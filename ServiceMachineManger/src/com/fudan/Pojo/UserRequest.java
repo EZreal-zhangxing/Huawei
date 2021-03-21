@@ -38,4 +38,13 @@ public class UserRequest {
     public void setVirtualMachineId(Integer virtualMachineId) {
         this.virtualMachineId = virtualMachineId;
     }
+
+    @Override
+    public String toString() {
+        return "UserRequest{" +
+                "operationType='" + operationType + '\'' +
+                ", virtualMachineType='" + virtualMachineType + '\'' +
+                ", virtualMachineId=" + virtualMachineId +
+                '}';
+    }
 }

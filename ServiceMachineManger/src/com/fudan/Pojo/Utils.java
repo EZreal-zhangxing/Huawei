@@ -25,14 +25,14 @@ public class Utils {
 
     public static VirtualMachine getVirtualMachine(String vmName){
         List<VirtualMachine> machineList = PublicDataPool.virtualToSale;
-        int left=0,right=machineList.size(),mid=0;
-        while(left<right){
+        int left=0,right=machineList.size()-1,mid=0;
+        while(left<=right){
             mid = (left+right)/2;
             VirtualMachine virtualMachine = machineList.get(mid);
             if(virtualMachine.getVmName().compareTo(vmName) < 0){
-                left = (left+right)/2 + 1;
+                left = mid + 1;
             }else{
-                right = (left+right)/2 - 1;
+                right = mid - 1;
             }
         }
         return machineList.get(mid);

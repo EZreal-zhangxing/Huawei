@@ -41,5 +41,14 @@ public class VirtualMachineOnService {
     public void setArrangeType(ArrangeType arrangeType) {
         this.arrangeType = arrangeType;
     }
+
+    @Override
+    public String toString() {
+        return "VirtualMachineOnService{" +
+                "vmid=" + vmid +
+                ", virtualMachine=" + virtualMachine +
+                ", arrangeType=" + arrangeType +
+                '}';
+    }
 }
 

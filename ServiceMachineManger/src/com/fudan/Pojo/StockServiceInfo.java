@@ -17,16 +17,52 @@ public class StockServiceInfo {
      * cost = hardCost + dailyCost * daily
      * 总消耗的价值
      */
-    private Integer cost;
+    private Integer cost=0;
 
     //日耗
-    private Integer dailyCost;
+    private Integer dailyCost=0;
 
     //存量服务器总的剩下的CPU
-    private Integer cpusNumber;
+    private Integer cpusNumber=0;
 
     //存量服务器总的剩下的内存
-    private Integer memoryNumber;
+    private Integer memoryNumber=0;
+
+    /**
+     * 数学性质上的修改可传入+-cost
+     * cost+=parm
+     * @param cost
+     */
+    public void setCostMath(Integer cost){
+        this.cost += cost;
+    }
+
+    /**
+     * 数学性质上的修改可传入+-dailyCost
+     * dailyCost+=parm
+     * @param dailyCost
+     */
+    public void setDailyCostMath(Integer dailyCost){
+        this.dailyCost += dailyCost;
+    }
+
+    /**
+     * 数学性质上的修改可传入+-cpusNumber
+     * cpusNumber+=parm
+     * @param cpusNumber
+     */
+    public void setCpusNumberMath(Integer cpusNumber){
+        this.cpusNumber += cpusNumber;
+    }
+
+    /**
+     * 数学性质上的修改可传入+-memoryNumber
+     * memoryNumber+=parm
+     * @param memoryNumber
+     */
+    public void setMemoryNumberMath(Integer memoryNumber){
+        this.memoryNumber += memoryNumber;
+    }
 
     public void setCpusNumber(Integer cpusNumber) {
         this.cpusNumber = cpusNumber;
