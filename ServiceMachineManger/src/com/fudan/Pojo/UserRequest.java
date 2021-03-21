@@ -10,7 +10,7 @@ public class UserRequest {
 
     private String virtualMachineType;
 
-    private Integer virtualMachineId;
+    private static Integer virtualMachineId;
 
     public UserRequest() {
     }
@@ -31,7 +31,7 @@ public class UserRequest {
         this.virtualMachineType = virtualMachineType;
     }
 
-    public Integer getVirtualMachineId() {
+    public static Integer getVirtualMachineId() {
         return virtualMachineId;
     }
 
