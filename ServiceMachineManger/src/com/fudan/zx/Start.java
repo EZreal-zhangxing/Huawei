@@ -20,6 +20,7 @@ public class Start {
     //已经购买的服务器列表
     List<ServiceMachine> haveServices = PublicDataPool.haveServices;
 
+    Map<Integer,List<String>> result = PublicDataPool.result;
 
     /**
      * 对数据进行初始化操作
@@ -28,69 +29,105 @@ public class Start {
         //读取文本数据
         ReadData readData = new ReadData();
         readData.getData();
-        //对服务器进行性价比排序操作
-        PublicDataPool.servicesToSale = PublicDataPool.servicesToSale.stream().sorted(Comparator.comparingDouble(ServiceMachine::getCostPriceRate)).collect(Collectors.toList());
+
         //输出服务器列表信息
-        servicesToSale.stream().forEach(System.out::println);
+//        servicesToSale.stream().forEach(System.out::println);
         //对虚拟机进行排序操作
         PublicDataPool.virtualToSale = PublicDataPool.virtualToSale.stream().sorted(Comparator.comparing(VirtualMachine::getVmName)).collect(Collectors.toList());
     }
 
     /**
+     * 对性价比进行更新并重排序
+     */
+    public void flushServiceRate(int days){
+        if(days > 2){
+            servicesToSale.stream().forEach(x -> x.flushCostPriceRate(days));
+        }
+        //对服务器进行性价比排序操作
+        PublicDataPool.servicesToSale = PublicDataPool.servicesToSale.stream().sorted(Comparator.comparingDouble(ServiceMachine::getCostPriceRate)).collect(Collectors.toList());
+    }
+    /**
      * 处理每天的数据
      */
     public void dealDailyRequest(DailyRequest dailyRequest,int day){
         System.out.println("处理第["+dailyRequest.getDay()+"]天数据["+dailyRequest.getNum()+"]条");
+        flushServiceRate(day);
         //初始化迁移操作次数
-        PublicDataPool.dailyMoveNum = (int) Math.floor(serviceInfo.getStockService().stream().collect(Collectors.summingInt(item -> {return item.getVirtualMachines().size();})) * 0.005);
+        PublicDataPool.dailyMoveNum = (int) Math.floor(PublicDataPool.virtualNumber * 0.005);
+        //实例化对象
+        result.put(day,new ArrayList<>());
+        int buyServiceNum = 0;
+
         for(UserRequest userRequest : dailyRequest.getRequests()){
-            System.out.println("\t处理请求：["+userRequest+"]");
+            System.out.println("\t["+day+"]/[800]处理请求：["+userRequest+"]");
             if(userRequest.getOperationType().equals(RequestEnum.ADD.getCode())){
                 //添加的请求
+                PublicDataPool.virtualNumber ++ ;
                 //更具请求的虚拟机找出的虚拟机配置信息
                 VirtualMachine virtualMachine = Utils.getVirtualMachine(userRequest.getVirtualMachineType());
                 StockService stockService = checkStockService(virtualMachine);
                 if(stockService != null){
                     //存量服务器足够 分配并更新存量服务器信息
-                    System.out.println("\t分配虚拟机id["+userRequest.getVirtualMachineId()+"],type["+virtualMachine.getVmName()+"] --> 服务器["+stockService.getId()+"]");
+//                    System.out.println("\t分配虚拟机id["+userRequest.getVirtualMachineId()+"],type["+virtualMachine.getVmName()+"] --> 服务器["+stockService.getId()+"]");
                     updateStockService(stockService,virtualMachine,userRequest.getVirtualMachineId());
                     updateServiceToVm(stockService,userRequest.getVirtualMachineId());
+                    result.get(day).add(stockService.getId()+"");
                 }else{
                     //总容量够不够
                     if(checkAllStockService(virtualMachine)){
                         //总容量够考虑迁移算法
-                        System.out.println("\t迁移算法开始...");
-                        int movenum = moveService(day);
+//                        System.out.println("\t迁移算法开始...");
+                        int movenum = 0;
+//                        int movenum = moveService(day);
+                        result.get(day).add("migration_"+movenum);
                         if(movenum > 0){
                             //迁移成功一次
                             //开始分配
                             StockService stockServiceAgain = checkStockService(virtualMachine);
                             if(stockServiceAgain != null){
                                 //存量服务器足够 分配并更新存量服务器信息
-                                System.out.println("\t分配虚拟机id["+userRequest.getVirtualMachineId()+"],type["+virtualMachine.getVmName()+"] --> 服务器["+stockService.getId()+"]");
-                                updateStockService(stockService,virtualMachine,userRequest.getVirtualMachineId());
-                                updateServiceToVm(stockService,userRequest.getVirtualMachineId());
+//                                System.out.println("\t分配虚拟机id["+userRequest.getVirtualMachineId()+"],type["+virtualMachine.getVmName()+"] --> 服务器["+stockService.getId()+"]");
+                                updateStockService(stockServiceAgain,virtualMachine,userRequest.getVirtualMachineId());
+                                updateServiceToVm(stockServiceAgain,userRequest.getVirtualMachineId());
+                            }else{
+                                //存量服务器不够购买
+                                //购买服务器
+//                                StockService service = buyService();
+//                                result.get(day).add(service.getMachineName()+"_1");
+                                buyServiceAndUpdate(virtualMachine,userRequest.getVirtualMachineId(),day);
+                                buyServiceNum++;
+//                                updateStockService(service,virtualMachine,userRequest.getVirtualMachineId());
+//                                updateServiceToVm(service,userRequest.getVirtualMachineId());
+
                             }
                         }else{
                             //并不能迁移出合适的服务器
-                            System.out.println("\t迁移失败!!!");
+//                            System.out.println("\t迁移失败!!!");
 //                            StockService service = buyService();
+                            buyServiceAndUpdate(virtualMachine,userRequest.getVirtualMachineId(),day);
+                            buyServiceNum++;
+//                            result.get(day).add(service.getMachineName()+"_1");
 //                            System.out.println("\t购买服务器["+service+"]");
 //                            System.out.println("\t分配虚拟机id["+userRequest.getVirtualMachineId()+"],type["+virtualMachine.getVmName()+"] --> 服务器["+service.getId()+"]");
-//                            putVirtualToservice(virtualMachine,service);
+//                            updateStockService(service,virtualMachine,userRequest.getVirtualMachineId());
+//                            updateServiceToVm(service,userRequest.getVirtualMachineId());
                         }
+                    }else{
+                        //总量不够
+                        //购买服务器
+//                        StockService service = buyService();
+//                        result.get(day).add(service.getMachineName()+"_1");
+                        buyServiceAndUpdate(virtualMachine,userRequest.getVirtualMachineId(),day);
+                        buyServiceNum++;
+//                        ServiceMachine sale = servicesToSale.get(service.getId());
+//                        System.out.println("\t购买服务器["+service+"]");
+//                        System.out.println("\t分配虚拟机id["+userRequest.getVirtualMachineId()+"],type["+virtualMachine.getVmName()+"] --> 服务器["+service.getId()+"]");
+//                        updateStockService(service,virtualMachine,userRequest.getVirtualMachineId());
+//                        updateServiceToVm(service,userRequest.getVirtualMachineId());
                     }
-                    //总量不够
-                    //购买服务器
-                    StockService service = buyService();
-                    ServiceMachine sale = servicesToSale.get(service.getId());
-                    System.out.println("\t购买服务器["+service+"]");
-                    System.out.println("\t分配虚拟机id["+userRequest.getVirtualMachineId()+"],type["+virtualMachine.getVmName()+"] --> 服务器["+service.getId()+"]");
-                    putVirtualToservice(virtualMachine,service);
                 }
             }else{
                 //删除的请求
-                System.out.println("\t处理请求：["+userRequest+"]");
                 int key=0;//serviceid
                 for(Map.Entry<Integer,List<Integer>> entry:serviceToVMachine.entrySet()){
                     if(entry.getValue().contains(userRequest.getVirtualMachineId())){
@@ -98,24 +135,47 @@ public class Start {
                         break;
                     }
                 }
+
                 StockService target = null;
                 for(StockService service:serviceInfo.getStockService()){
-                    if(service.getId() == key){
+                    if(service.getId().intValue() == key){
                         target = service;
                         break;
                     }
                 }
                 VirtualMachineOnService machineOnService = null;
                 for(VirtualMachineOnService onService:target.getVirtualMachines()){
-                    if(onService.getVmid() == userRequest.getVirtualMachineId()){
+                    if(userRequest.getVirtualMachineId().intValue() == onService.getVmid().intValue()){
                         machineOnService = onService;
                         break;
                     }
                 }
+
+//                StockService target = serviceInfo.getStockService().get(key);
+//                VirtualMachineOnService machineOnService = target.getVirtualMachines().get(vmId);
+                System.out.println("\t删除存量服务器["+target.getId()+"],["+machineOnService.getVmid()+"]");
                 delVirtualMachine(target,machineOnService);
-                System.out.println("\t从服务器["+target.getId()+"] 上删除虚拟机实例["+machineOnService.getVmid()+"]");
+                //删除虚拟机
+                PublicDataPool.virtualNumber--;
+//                System.out.println("\t从服务器["+target.getId()+"] 上删除虚拟机实例["+machineOnService.getVmid()+"]");
             }
         }
+        //更新服务器的日耗
+        serviceInfo.setCostMath(serviceInfo.getDailyCost());
+        result.get(day).add("purchase_"+buyServiceNum);
+    }
+
+    /**
+     * 购买并更新服务器信息
+     * @param virtualMachine
+     * @param vmId
+     */
+    public void buyServiceAndUpdate(VirtualMachine virtualMachine,Integer vmId,int day){
+        //购买服务器
+        StockService service = buyService();
+        result.get(day).add(service.getServiceMachine().getServiceName()+"_1");
+        updateStockService(service,virtualMachine,vmId);
+        updateServiceToVm(service,vmId);
     }
 
     /**
@@ -138,6 +198,8 @@ public class Start {
         }
         //移除掉虚拟机
         stockService.getVirtualMachines().remove(onService);
+        //删除虚拟机和服务器的映射关系
+        serviceToVMachine.get(stockService.getId()).remove(onService.getVmid());
     }
 
 
@@ -184,6 +246,8 @@ public class Start {
                     checkServiceIsEmpy(service);
                     //将虚拟机放入指定服务器
                     updateStockService(targetstockService,onService.getVirtualMachine(),onService.getVmid());
+                    updateServiceToVm(targetstockService,onService.getVmid());
+                    PublicDataPool.result.get(day).add("move_"+onService.getVmid()+"_"+targetstockService.getId());
                     System.out.println("将服务器 service["+service.getId()+"] 上的虚拟机["+onService.getVmid()+","+onService.getVirtualMachine().getVmName()+"] ---> ["+targetstockService.getId()+"]");
                 }else{
                     //并没找到合适的虚拟机
@@ -200,7 +264,7 @@ public class Start {
     public void checkServiceIsEmpy(StockService stockService){
         if(stockService.getVirtualMachines().size() == 0){
             //将日耗减掉
-            serviceInfo.setDailyCostMath(-servicesToSale.get(stockService.getId()).getDailyCost());
+            serviceInfo.setDailyCostMath(-stockService.getServiceMachine().getDailyCost());
         }
     }
 
@@ -221,15 +285,15 @@ public class Start {
         List<StockService> list = serviceInfo.getStockService();
         int differentASum=Integer.MAX_VALUE,differentBSum=Integer.MAX_VALUE;//A,B节点CPU、内存分别与目标区域的差值
         int sum = 0;
-        HashMap<String,String> map = new HashMap<>(list.size() - start);
+//        HashMap<String,String> map = new HashMap<>(list.size() - start);
         for(int i=start;i<list.size();i++){
             sum = 0;
             StockService stockService = list.get(i);
             List<VirtualMachineOnService> onServiceList = stockService.getVirtualMachines();
-            System.out.println("\t\t开始查找存量服务器["+stockService.getId()+"]");
+//            System.out.println("\t\t开始查找存量服务器["+stockService.getId()+"]");
             for(int j=0;j<onServiceList.size();j++){
                 VirtualMachineOnService machineOnService = onServiceList.get(j);
-                System.out.println("\t\t\t开始查找虚拟机["+machineOnService.getVmid()+"]["+machineOnService.getVirtualMachine()+"]");
+//                System.out.println("\t\t\t开始查找虚拟机["+machineOnService.getVmid()+"]["+machineOnService.getVirtualMachine()+"]");
                 int asum=0,bsum=0;
                 if(machineOnService.getVirtualMachine().getType() == 0){
                     //单节点部署
@@ -262,14 +326,14 @@ public class Start {
                         bsum = -1;
                     }
                 }
-                map.put("服务器id["+i+"]_虚拟机["+j+"]","A剩余["+asum+"]_B剩余["+bsum+"]");
-                System.out.println("\t\t服务器id["+i+"]_虚拟机["+j+"]"+"A剩余["+asum+"]_B剩余["+bsum+"]");
+//                map.put("服务器id["+i+"]_虚拟机["+j+"]","A剩余["+asum+"]_B剩余["+bsum+"]");
+//                System.out.println("\t\t服务器id["+i+"]_虚拟机["+j+"]"+"A剩余["+asum+"]_B剩余["+bsum+"]");
                 if(asum >=0 && bsum >=0 && asum <= differentASum && bsum <= differentBSum){
                     differentASum = asum;
                     differentBSum = bsum;
                     result.put("vm",machineOnService);
                     result.put("sm",stockService);
-                    System.out.println("\t\t最适合虚拟机为["+i+"]["+j+"]");
+//                    System.out.println("\t\t最适合虚拟机为["+i+"]["+j+"]");
                 }
             }
         }
@@ -285,7 +349,9 @@ public class Start {
     public StockService buyService(){
         ServiceMachine serviceMachine = servicesToSale.get(0);
         StockService stockService = new StockService();
-        stockService.setId(serviceMachine.getId());
+//        stockService.setId(serviceMachine.getId());
+        stockService.setServiceMachine(serviceMachine);
+        stockService.setId(PublicDataPool.alreadlyBuyService++);
         stockService.setCpuNumber(serviceMachine.getCpuNumber());
         stockService.setMemoryNumber(serviceMachine.getMemoryNumber());
         stockService.getNodes().put(NodeType.A,new ServiceNode(NodeType.A,serviceMachine.getCpuNumber()/2,serviceMachine.getMemoryNumber()/2));
@@ -344,7 +410,7 @@ public class Start {
      * @return
      */
     public ArrangeType putVirtualToservice(VirtualMachine virtualMachine,StockService stockService){
-        System.out.println("\t存量服务器["+stockService.getId()+"] cpu["+stockService.getCpuNumber()+"] memory["+stockService.getMemoryNumber()+"]");
+//        System.out.println("\t存量服务器["+stockService.getId()+"] cpu["+stockService.getCpuNumber()+"] memory["+stockService.getMemoryNumber()+"]");
         //更新存量服务器单个的统计信息 cpu+memory
         stockService.setCpuNumberMath(-virtualMachine.getCpuNumber());
         stockService.setMemoryNumberMath(-virtualMachine.getMemoryNumber());
@@ -353,7 +419,7 @@ public class Start {
         //更新整体存量服务器的信息
         serviceInfo.setCpusNumberMath(-virtualMachine.getCpuNumber());
         serviceInfo.setMemoryNumberMath(-virtualMachine.getMemoryNumber());
-        System.out.println("\t整体服务器 cpu["+serviceInfo.getCpusNumber()+"] memory["+serviceInfo.getMemoryNumber()+"]");
+//        System.out.println("\t整体服务器 cpu["+serviceInfo.getCpusNumber()+"] memory["+serviceInfo.getMemoryNumber()+"]");
 
         if(virtualMachine.getType() == 0){
             //单节点 优先部署A节点
@@ -417,19 +483,19 @@ public class Start {
         Optional<StockService> stockService = serviceInfo.getStockService().stream().filter(item ->{
             if(virtualMachine.getType() == 0){
                 //单节点部署
-                if((item.getNodes().get(NodeType.A).getCpuNumber() > virtualMachine.getCpuNumber() &&
-                        item.getNodes().get(NodeType.A).getMemoryNumber() > virtualMachine.getMemoryNumber()) ||
-                        (item.getNodes().get(NodeType.B).getCpuNumber() > virtualMachine.getCpuNumber() &&
-                                item.getNodes().get(NodeType.B).getMemoryNumber() > virtualMachine.getMemoryNumber())){
+                if((item.getNodes().get(NodeType.A).getCpuNumber() >= virtualMachine.getCpuNumber() &&
+                        item.getNodes().get(NodeType.A).getMemoryNumber() >= virtualMachine.getMemoryNumber()) ||
+                        (item.getNodes().get(NodeType.B).getCpuNumber() >= virtualMachine.getCpuNumber() &&
+                                item.getNodes().get(NodeType.B).getMemoryNumber() >= virtualMachine.getMemoryNumber())){
                     return true;
                 }
                 return false;
             }else{
                 //双节点
-                if((item.getNodes().get(NodeType.A).getCpuNumber() > virtualMachine.getCpuNumber()/2 &&
-                        item.getNodes().get(NodeType.A).getMemoryNumber() > virtualMachine.getMemoryNumber()/2) &&
-                        (item.getNodes().get(NodeType.B).getCpuNumber() > virtualMachine.getCpuNumber()/2 &&
-                                item.getNodes().get(NodeType.B).getMemoryNumber() > virtualMachine.getMemoryNumber()/2)){
+                if((item.getNodes().get(NodeType.A).getCpuNumber() >= virtualMachine.getCpuNumber()/2 &&
+                        item.getNodes().get(NodeType.A).getMemoryNumber() >= virtualMachine.getMemoryNumber()/2) &&
+                        (item.getNodes().get(NodeType.B).getCpuNumber() >= virtualMachine.getCpuNumber()/2 &&
+                                item.getNodes().get(NodeType.B).getMemoryNumber() >= virtualMachine.getMemoryNumber()/2)){
                     return true;
                 }
                 return false;
@@ -439,8 +505,14 @@ public class Start {
     }
 
     public static void main(String[] args) {
+        long starttime = System.currentTimeMillis();
         Start start = new Start();
         start.initData();
-        start.dealDailyRequest(PublicDataPool.dailyRequests.get(0),0);
+        for(int i=0;i<800;i++){
+            start.dealDailyRequest(PublicDataPool.dailyRequests.get(i),i);
+        }
+        long endtime = System.currentTimeMillis();
+        System.out.println("耗时["+(endtime-starttime)/1000+"] s");
+        System.out.println(start.serviceInfo.getCost());
     }
 }

@@ -66,7 +66,7 @@ public class ReadData {
                      * 性价比
                      * （硬件成本）/（核心数+内存数）
                      */
-                    serviceMachine.setCostPriceRate(Integer.parseInt(data[3]) * 1.0f / (Integer.parseInt(data[1]) + Integer.parseInt(data[2])));
+                    serviceMachine.setCostPriceRate((Integer.parseInt(data[3]) + days * Integer.parseInt(data[4]) * 1.0f) / (0.5f * Integer.parseInt(data[1]) + 0.5f * Integer.parseInt(data[2])));
                     PublicDataPool.servicesToSale.add(serviceMachine);
                 }
                 if(step == 1){

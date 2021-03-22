@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class StockServiceInfo {
     //存量服务器列表
-    private static List<StockService> stockService = new LinkedList<>();
+    private List<StockService> stockService = new LinkedList<>();
 
     /**
      * cost = hardCost + dailyCost * daily
@@ -83,12 +83,12 @@ public class StockServiceInfo {
     public StockServiceInfo() {
     }
 
-    public static List<StockService> getStockService() {
+    public List<StockService> getStockService() {
         return stockService;
     }
 
-    public static void setStockService(List<StockService> stockService) {
-        StockServiceInfo.stockService = stockService;
+    public void setStockService(List<StockService> stockService) {
+        this.stockService = stockService;
     }
 
     public Integer getCost() {

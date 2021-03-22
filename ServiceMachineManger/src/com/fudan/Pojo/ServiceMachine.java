@@ -100,4 +100,8 @@ public class ServiceMachine {
     public void setDailyCost(Integer dailyCost) {
         this.dailyCost = dailyCost;
     }
+
+    public void flushCostPriceRate(int days){
+        this.costPriceRate = (this.cost+this.dailyCost*days)/(0.5f * this.cpuNumber + 0.5f * this.memoryNumber);
+    }
 }

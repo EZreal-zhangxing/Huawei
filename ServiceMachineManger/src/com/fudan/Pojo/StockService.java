@@ -12,6 +12,8 @@ import java.util.List;
 public class StockService {
     //服务器ID
     private Integer id;
+    //服务器名
+    private ServiceMachine serviceMachine;
 
     private Integer cpuNumber;
 
@@ -107,10 +109,19 @@ public class StockService {
         this.isFull = isFull;
     }
 
+    public ServiceMachine getServiceMachine() {
+        return serviceMachine;
+    }
+
+    public void setServiceMachine(ServiceMachine serviceMachine) {
+        this.serviceMachine = serviceMachine;
+    }
+
     @Override
     public String toString() {
         return "StockService{" +
                 "id=" + id +
+                ", serviceMachine=" + serviceMachine +
                 ", cpuNumber=" + cpuNumber +
                 ", memoryNumber=" + memoryNumber +
                 ", isFull=" + isFull +

@@ -8,7 +8,14 @@ import java.util.*;
  * 数据池
  */
 public class PublicDataPool {
+    //每日可以迁移的数量
     public static Integer dailyMoveNum=0;
+
+    //虚拟机数量
+    public static Integer virtualNumber = 0;
+
+    //已经购买服务器的数量
+    public static Integer alreadlyBuyService = 0;
     //可以购买的服务器列表
     public static List<ServiceMachine> servicesToSale = new ArrayList<>();
     //可以代售的虚拟机列表
@@ -34,4 +41,6 @@ public class PublicDataPool {
     //日常请求
     public static List<DailyRequest> dailyRequests = new LinkedList<>();
     //每天的结果
+
+    public static Map<Integer,List<String>> result = new HashMap<>();
 }
