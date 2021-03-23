@@ -17,11 +17,5 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        Map<String,String> map = new TreeMap<>();
-//        map.put("a","1");
-//        Map<String,String> map2 = new TreeMap<>();
-//        map2.put("a","2");
-//        map.putAll(map2);
-//        System.out.println(map);
     }
 }

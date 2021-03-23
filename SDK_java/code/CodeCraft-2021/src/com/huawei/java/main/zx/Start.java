@@ -50,12 +50,10 @@ public class Start extends PublicDataPool {
         //对服务器进行性价比排序操作
         PublicDataPool.servicesToSale = PublicDataPool.servicesToSale.stream().sorted(Comparator.comparingDouble(ServiceMachine::getCostPriceRate)).collect(Collectors.toList());
 
-//        PublicDataPool.servicesToSale.forEach(item -> System.out.println(item.getServiceName() +" ,"+item.getCostPriceRate()));
     }
 
 
     public void preDealService(DailyRequest dailyRequest){
-        HashMap<String,List<ServiceMachine>> map = new HashMap<>();
         for(UserRequest userRequest:dailyRequest.getRequests()){
             if(userRequest.getOperationType().equals(RequestEnum.ADD.getCode())){
                 VirtualMachine virtualMachine = Utils.getVirtualMachine(userRequest.getVirtualMachineType());
@@ -85,7 +83,7 @@ public class Start extends PublicDataPool {
                     }
                 }
                 if(!stockisok){
-                    PreBuyService preBuyService = choiceServiceMachine(userRequest,virtualMachine);
+                    PreBuyService preBuyService = choiceServiceMachine(virtualMachine);
                     if(preBuyService!= null){
                         PublicDataPool.preBuyServices.add(preBuyService);
                     }
@@ -99,7 +97,7 @@ public class Start extends PublicDataPool {
      * 选择合适的服务器
      * @return
      */
-    public PreBuyService choiceServiceMachine(UserRequest userRequest,VirtualMachine virtualMachine){
+    public PreBuyService choiceServiceMachine(VirtualMachine virtualMachine){
         //判断现有的服务器够不够
         boolean isenough = false;
         for(PreBuyService preBuyService : PublicDataPool.preBuyServices){
@@ -197,12 +195,12 @@ public class Start extends PublicDataPool {
      */
     public void dealDailyRequest(DailyRequest dailyRequest) throws IOException {
 //        System.out.println("处理第["+dailyRequest.getDay()+"]天数据["+dailyRequest.getNum()+"]条");
-        flushServiceRate();
+//        flushServiceRate();
         //初始化迁移操作次数
-        PublicDataPool.dailyMoveNum = (int) Math.floor(PublicDataPool.virtualNumber * 0.005);
+//        PublicDataPool.dailyMoveNum = (int) Math.floor(PublicDataPool.virtualNumber * 0.005);
         //实例化对象
-        PublicDataPool.result.put(day,new HashMap<>());
-//        preDealData(dailyRequest);
+//        PublicDataPool.result.put(day,new HashMap<>());
+        preDealData(dailyRequest);
         int befour = PublicDataPool.alreadlyBuyService;
         int addrequest = 0;
         for(UserRequest userRequest : dailyRequest.getRequests()){
@@ -876,32 +874,6 @@ public class Start extends PublicDataPool {
         for(PublicDataPool.day=0;PublicDataPool.day<PublicDataPool.allDays;PublicDataPool.day++){
             start.dealDailyRequest(PublicDataPool.dailyRequests.get(PublicDataPool.day));
         }
-//        int index=0;
-//        int truenum = 0,falsenum = 0,dailyrequest = 0;
-//        for(int i=0;i<PublicDataPool.allDays;i++){
-//            for(UserRequest userRequest:PublicDataPool.dailyRequests.get(i).getRequests()){
-//                if(userRequest.getOperationType().equals(RequestEnum.ADD.getCode())){
-//                    dailyrequest++;
-//                    VirtualMachine vm = Utils.getVirtualMachine(userRequest.getVirtualMachineType());
-//                    ArrangeType arrangeType = PublicDataPool.arrangeTypes.get(index);
-//                    index++;
-//                    if(vm.getType() == 0){
-//                        if(arrangeType == ArrangeType.A || arrangeType == ArrangeType.B){
-//                            truenum++;
-//                        }else{
-//                            falsenum++;
-//                        }
-//                    }else{
-//                        if(arrangeType == ArrangeType.ALL){
-//                            truenum++;
-//                        }else{
-//                            falsenum++;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        System.out.println("true num is["+truenum+"],false num is ["+falsenum+"],dailyNum ["+dailyrequest+"]");
     }
 
 //    public static void main(String[] args) {
