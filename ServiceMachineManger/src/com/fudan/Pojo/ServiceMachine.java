@@ -101,7 +101,7 @@ public class ServiceMachine {
         this.dailyCost = dailyCost;
     }
 
-    public void flushCostPriceRate(int days){
-        this.costPriceRate = (this.cost+this.dailyCost*days)/(0.5f * this.cpuNumber + 0.5f * this.memoryNumber);
+    public void flushCostPriceRate(int days,int nowday){
+        this.costPriceRate = (this.cost+this.dailyCost*(days-nowday))/(0.5f * this.cpuNumber + 0.5f * this.memoryNumber);
     }
 }

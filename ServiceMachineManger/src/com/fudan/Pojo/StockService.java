@@ -22,6 +22,9 @@ public class StockService {
     //该服务器是否使用完毕 0没有 1使用完毕
     private Integer isFull=0;
 
+    //该存量服务器是否是虚拟节点
+    private boolean isVirtual;
+
     //虚拟机列表
     private List<VirtualMachineOnService> virtualMachines;
 
@@ -115,6 +118,14 @@ public class StockService {
 
     public void setServiceMachine(ServiceMachine serviceMachine) {
         this.serviceMachine = serviceMachine;
+    }
+
+    public boolean isVirtual() {
+        return isVirtual;
+    }
+
+    public void setVirtual(boolean virtual) {
+        isVirtual = virtual;
     }
 
     @Override

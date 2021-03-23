@@ -1,5 +1,6 @@
 package fudan.zx;
 
+
 import fudan.Pojo.*;
 
 import java.io.*;
@@ -10,21 +11,23 @@ import java.io.*;
  */
 public class ReadData {
 
-    public static final String fileDir = "D:\\workspace\\HuaWeiProject\\ServiceMachineManger\\src\\com\\fudan\\Data\\";
+    public static final String fileDir = "D:\\workspace\\HuaWei\\ServiceMachineManger\\src\\com\\fudan\\Data\\";
 
     public static final String filename = "training-1.txt";
 
     public void getData(){
+        int days=0;
         try {
             BufferedReader reader = new BufferedReader(new FileReader(new File(fileDir+filename)));
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             String line = "";
             int countLine=0;//行数计数
             int lineSize = 1;//局部行数控制
             int step = -1; //step == 0 构建服务器 ==1 构建虚拟机 ==2 构建用户请求
-            int days=0,day=0; //一共有多少天的请求
+            int day=0; //一共有多少天的请求
             int vmnum=0,senum=0,usernum=0;
             DailyRequest dailyRequest=null;
-            while((line = reader.readLine())!=null){
+            while((line = reader.readLine().replaceAll(" ",""))!= null && !line.equals("")){
                 countLine++;
                 if(countLine == lineSize){
                     if(step<1){
@@ -79,6 +82,7 @@ public class ReadData {
                     PublicDataPool.virtualToSale.add(virtualMachine);
                 }
                 if(step == 2){
+
                     //构建用户请求
                     UserRequest userRequest = new UserRequest();
                     userRequest.setOperationType(data[0]);
@@ -89,6 +93,9 @@ public class ReadData {
                         userRequest.setVirtualMachineId(Integer.parseInt(data[1]));
                     }
                     dailyRequest.getRequests().add(userRequest);
+                    if(day == days && countLine == lineSize-1){
+                        break;
+                    }
                 }
             }
             if(day == days){
@@ -98,6 +105,7 @@ public class ReadData {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        PublicDataPool.allDays = days;
     }
 
     public String[] dealString(String line){

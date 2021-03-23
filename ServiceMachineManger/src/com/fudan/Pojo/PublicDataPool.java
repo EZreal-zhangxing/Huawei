@@ -13,6 +13,10 @@ public class PublicDataPool {
 
     //虚拟机数量
     public static Integer virtualNumber = 0;
+    //需要运行的天数
+    public static Integer allDays=0;
+    //当前处理的第几天数据
+    public static Integer day=0;
 
     //已经购买服务器的数量
     public static Integer alreadlyBuyService = 0;
@@ -42,5 +46,5 @@ public class PublicDataPool {
     public static List<DailyRequest> dailyRequests = new LinkedList<>();
     //每天的结果
 
-    public static Map<Integer,List<String>> result = new HashMap<>();
+    public static Map<Integer,Map<String,String>> result = new HashMap<>();
 }
