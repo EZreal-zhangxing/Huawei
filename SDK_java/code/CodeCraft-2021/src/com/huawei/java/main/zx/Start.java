@@ -302,45 +302,45 @@ public class Start extends PublicDataPool {
 
     public void printDailyInfo(int befour) throws Exception{
         Map<String,String> dailyResult = PublicDataPool.result.get(day);
-        Map<Integer,Integer> idToId = null;
-        if(dailyResult.containsKey("serviceName")){
-            String serviceNames = dailyResult.get("serviceName");
-            String[] servie = serviceNames.split("~");
-            LinkedHashMap<String,Integer> serviceNameAndNum = new LinkedHashMap<>();
-            for(int i=0;i<servie.length;i++){
-                String[] nameAndNum = servie[i].split("_");
-                if(serviceNameAndNum.containsKey(nameAndNum[0])){
-                    serviceNameAndNum.put(nameAndNum[0],serviceNameAndNum.get(nameAndNum[0])+Integer.parseInt(nameAndNum[1]));
-                }else{
-                    serviceNameAndNum.put(nameAndNum[0],Integer.parseInt(nameAndNum[1]));
-                }
-            }
-            //输出服务器信息
-            bufferedWriter.write("(purchase,"+serviceNameAndNum.keySet().size()+")");
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-//            Arrays.stream(servie).forEach(item -> {
-//                String[] ser = item.split("_");
-//                System.out.print("("+ser[0]+","+ser[1]+") ");
+//        Map<Integer,Integer> idToId = null;
+//        if(dailyResult.containsKey("serviceName")){
+//            String serviceNames = dailyResult.get("serviceName");
+//            String[] servie = serviceNames.split("~");
+//            LinkedHashMap<String,Integer> serviceNameAndNum = new LinkedHashMap<>();
+//            for(int i=0;i<servie.length;i++){
+//                String[] nameAndNum = servie[i].split("_");
+//                if(serviceNameAndNum.containsKey(nameAndNum[0])){
+//                    serviceNameAndNum.put(nameAndNum[0],serviceNameAndNum.get(nameAndNum[0])+Integer.parseInt(nameAndNum[1]));
+//                }else{
+//                    serviceNameAndNum.put(nameAndNum[0],Integer.parseInt(nameAndNum[1]));
+//                }
+//            }
+//            //输出服务器信息
+//            bufferedWriter.write("(purchase,"+serviceNameAndNum.keySet().size()+")");
+//            bufferedWriter.newLine();
+//            bufferedWriter.flush();
+////            Arrays.stream(servie).forEach(item -> {
+////                String[] ser = item.split("_");
+////                System.out.print("("+ser[0]+","+ser[1]+") ");
+////            });
+////            System.out.println();
+//            idToId = recodeServiceId(serviceNameAndNum,befour);
+////            System.out.println(idToId);
+//            serviceNameAndNum.forEach((k,v) -> {
+//                try {
+//                    bufferedWriter.write("("+k+","+v+")");
+//                    bufferedWriter.newLine();
+//                    bufferedWriter.flush();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
 //            });
-//            System.out.println();
-            idToId = recodeServiceId(serviceNameAndNum,befour);
-//            System.out.println(idToId);
-            serviceNameAndNum.forEach((k,v) -> {
-                try {
-                    bufferedWriter.write("("+k+","+v+")");
-                    bufferedWriter.newLine();
-                    bufferedWriter.flush();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        }else{
-//            System.out.println("(purchase,0)");
-            bufferedWriter.write("(purchase,0)");
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-        }
+//        }else{
+////            System.out.println("(purchase,0)");
+//            bufferedWriter.write("(purchase,0)");
+//            bufferedWriter.newLine();
+//            bufferedWriter.flush();
+//        }
 //        System.out.println("(migration,"+dailyResult.get("migration")+")");
         bufferedWriter.write("(migration,"+(dailyResult.containsKey("migration")?dailyResult.get("migration"):"0")+")");
         bufferedWriter.newLine();
@@ -351,20 +351,20 @@ public class Start extends PublicDataPool {
             for(String item:moveinfo){
                 String[] moves = item.split("_");
                 try {
-                    if(moves.length > 2){
-                        if(idToId != null){
-                            bufferedWriter.write("("+(idToId.containsKey(Integer.parseInt(moves[0]))?idToId.get(Integer.parseInt(moves[0])):moves[0])+"," +
-                                    ""+(idToId.containsKey(Integer.parseInt(moves[1]))?idToId.get(Integer.parseInt(moves[1])):moves[1])+","+moves[2]+")");
-                        }
-                    }else{
-                        bufferedWriter.write("("+(idToId.containsKey(Integer.parseInt(moves[0]))?idToId.get(Integer.parseInt(moves[0])):moves[0])+"," +
-                                ""+(idToId.containsKey(Integer.parseInt(moves[1]))?idToId.get(Integer.parseInt(moves[1])):moves[1])+")");
-                    }
 //                    if(moves.length > 2){
-//                        bufferedWriter.write("( "+moves[0]+" , " +moves[1]+" , "+moves[2]+" )");
+//                        if(idToId != null){
+//                            bufferedWriter.write("("+(idToId.containsKey(Integer.parseInt(moves[0]))?idToId.get(Integer.parseInt(moves[0])):moves[0])+"," +
+//                                    ""+(idToId.containsKey(Integer.parseInt(moves[1]))?idToId.get(Integer.parseInt(moves[1])):moves[1])+","+moves[2]+")");
+//                        }
 //                    }else{
-//                        bufferedWriter.write("( "+moves[0]+" , "+moves[1]+" )");
+//                        bufferedWriter.write("("+(idToId.containsKey(Integer.parseInt(moves[0]))?idToId.get(Integer.parseInt(moves[0])):moves[0])+"," +
+//                                ""+(idToId.containsKey(Integer.parseInt(moves[1]))?idToId.get(Integer.parseInt(moves[1])):moves[1])+")");
 //                    }
+                    if(moves.length > 2){
+                        bufferedWriter.write("( "+moves[0]+" , " +moves[1]+" , "+moves[2]+" )");
+                    }else{
+                        bufferedWriter.write("( "+moves[0]+" , "+moves[1]+" )");
+                    }
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
                 } catch (IOException e) {
@@ -386,12 +386,12 @@ public class Start extends PublicDataPool {
 //                    PublicDataPool.arrangeTypes.add(null);
 //                }
                 try {
-                    if(idToId != null){
-                        bufferedWriter.write("("+(idToId.containsKey(Integer.parseInt(nodes[0]))?idToId.get(Integer.parseInt(nodes[0])):nodes[0])+","+nodes[1]+")");
-                    }else{
-                        bufferedWriter.write("("+nodes[0]+","+nodes[1]+")");
-                    }
-//                    bufferedWriter.write("( "+nodes[0]+" , "+nodes[1]+" )");
+//                    if(idToId != null){
+//                        bufferedWriter.write("("+(idToId.containsKey(Integer.parseInt(nodes[0]))?idToId.get(Integer.parseInt(nodes[0])):nodes[0])+","+nodes[1]+")");
+//                    }else{
+//                        bufferedWriter.write("("+nodes[0]+","+nodes[1]+")");
+//                    }
+                    bufferedWriter.write("( "+nodes[0]+" , "+nodes[1]+" )");
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
                 } catch (IOException e) {
@@ -400,13 +400,13 @@ public class Start extends PublicDataPool {
             }
             else{
                 try {
-                    PublicDataPool.arrangeTypes.add(ArrangeType.ALL);
-                    if(idToId != null){
-                        bufferedWriter.write("("+(idToId.containsKey(Integer.parseInt(nodes[0]))?idToId.get(Integer.parseInt(nodes[0])):nodes[0])+")");
-                    }else{
-                        bufferedWriter.write("("+nodes[0]+")");;
-                    }
-//                    bufferedWriter.write("( "+nodes[0]+" )");;
+//                    PublicDataPool.arrangeTypes.add(ArrangeType.ALL);
+//                    if(idToId != null){
+//                        bufferedWriter.write("("+(idToId.containsKey(Integer.parseInt(nodes[0]))?idToId.get(Integer.parseInt(nodes[0])):nodes[0])+")");
+//                    }else{
+//                        bufferedWriter.write("("+nodes[0]+")");;
+//                    }
+                    bufferedWriter.write("( "+nodes[0]+" )");;
                     bufferedWriter.newLine();
                     bufferedWriter.flush();
                 } catch (IOException e) {
